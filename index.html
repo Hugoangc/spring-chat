@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Spring WebSocket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #conversation { display: none; }
+        .chat-box { height: 300px; overflow-y: scroll; background-color: #f8f9fa; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Chat com Spring Boot & STOMP</h2>
+
+    <div id="connection-form" class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="username" class="form-control" placeholder="Seu Nome" required>
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="room" class="form-control" placeholder="Nome da Sala (ex: geral)" value="geral" required>
+        </div>
+        <div class="col-md-4">
+            <button id="connect" class="btn btn-primary" onclick="connect()">Conectar</button>
+            <button id="disconnect" class="btn btn-danger" onclick="disconnect()" disabled>Desconectar</button>
+        </div>
+    </div>
+
+    <div id="conversation">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="chat-content" class="chat-box mb-3">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+                <input type="text" id="message" class="form-control" placeholder="Digite sua mensagem...">
+            </div>
+            <div class="col-md-2">
+                <button id="send" class="btn btn-success w-100" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    var stompClient = null;
+    var currentRoom = null;
+
+    function setConnected(connected) {
+        document.getElementById('connect').disabled = connected;
+        document.getElementById('disconnect').disabled = !connected;
+        document.getElementById('conversation').style.display = connected ? 'block' : 'none';
+        document.getElementById('chat-content').innerHTML = ""; // Limpa chat ao reconectar
+    }
+
+    function connect() {
+        var username = document.getElementById('username').value;
+        var room = document.getElementById('room').value;
+
+        if(!username || !room) {
+            alert("Por favor, preencha nome e sala.");
+            return;
+        }
+
+        currentRoom = room;
+
+        var socket = new SockJS('http://localhost:8080/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            setConnected(true);
+            console.log('Conectado: ' + frame);
+
+            stompClient.subscribe('/topic/chat/' + currentRoom, function (messageOutput) {
+                showMessage(JSON.parse(messageOutput.body));
+            });
+
+        }, function(error) {
+            alert("Erro na conexão! Verifique se o servidor Java está rodando.");
+            console.log(error);
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        setConnected(false);
+        console.log("Desconectado");
+    }
+
+    function sendMessage() {
+        var username = document.getElementById('username').value;
+        var messageContent = document.getElementById('message').value;
+
+        if(messageContent && stompClient) {
+            stompClient.send("/app/chat.send/" + currentRoom, {}, JSON.stringify({
+                'from': username,
+                'content': messageContent
+            }));
+
+            document.getElementById('message').value = '';
+        }
+    }
+
+    function showMessage(message) {
+        var chatBox = document.getElementById('chat-content');
+        var messageElement = document.createElement('div');
+
+        var time = message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : '';
+
+        messageElement.className = "alert alert-secondary p-2 mb-2";
+        messageElement.innerHTML = `<strong>${message.from}</strong> <small class="text-muted">[${time}]</small>: ${message.content}`;
+
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
