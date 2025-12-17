@@ -39,7 +39,7 @@ graph LR
 
 ---
 
-## 🛠 Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 - Java 21 + Spring Boot 3
 - Spring WebSocket (base da comunicação)
@@ -49,7 +49,7 @@ graph LR
 
 ---
 
-## ▶️ Execução
+##  Execução
 
 ### Backend (Spring Boot)
 
@@ -61,19 +61,23 @@ Certifique-se de que o Java está instalado e execute:
 ```
 
 ### Cliente
-Como o frontend é um arquivo estático simples, você pode simplesmente abrir o arquivo index.html diretamente no seu navegador.
-Nota: O CORS já está configurado no backend (setAllowedOriginPatterns("*")) para aceitar conexões externas.
+- Como o frontend é um arquivo estático simples, você pode simplesmente abrir o arquivo index.html diretamente no seu navegador.
+- Nota: O CORS já está configurado no backend (setAllowedOriginPatterns("*")) para aceitar conexões externas.
 
-Como Testar:
-Abra o navegador em http://localhost:8080 (ou abra o arquivo HTML).
-Preencha o Nome (ex: "Alice") e a Sala (ex: "geral").
-Clique no botão Conectar. A caixa de chat aparecerá.
-Abra uma Janela Anônima ou outro navegador.
-Repita o processo com outro nome (ex: "Bob") mas na mesma sala ("geral").
-Envie mensagens e observe a atualização instantânea nas duas telas.
+---
 
-Conceitos:
-WebSocket vs HTTP: Demonstração prática de como o servidor pode enviar dados ativamente ("push") para o cliente sem que o cliente precise solicitar (polling).
-Roteamento Dinâmico: O uso de @DestinationVariable no Spring permite criar salas de chat dinâmicas (/topic/chat/{room}) sem configuração prévia.
+### Como Testar:
+- Abra o navegador em http://localhost:8080 (ou abra o arquivo HTML).
+- Preencha o Nome (ex: "Alice") e a Sala (ex: "geral").
+- Clique no botão Conectar. A caixa de chat aparecerá.
+- Abra uma Janela Anônima ou outro navegador.
+- Repita o processo com outro nome (ex: "Bob") mas na mesma sala ("geral").
+- Envie mensagens e observe a atualização instantânea nas duas telas.
+
+---
+
+### Conceitos:
+- WebSocket vs HTTP: Demonstração prática de como o servidor pode enviar dados ativamente ("push") para o cliente sem que o cliente precise solicitar (polling).
+- Roteamento Dinâmico: O uso de @DestinationVariable no Spring permite criar salas de chat dinâmicas (/topic/chat/{room}) sem configuração prévia.
 
 
